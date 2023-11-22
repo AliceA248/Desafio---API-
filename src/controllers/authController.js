@@ -5,6 +5,7 @@ const User = require('../models/userModels');
 const signUp = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ mensagem: 'E-mail já existente' });
@@ -47,5 +48,3 @@ const getUser = (req, res) => {
 };
 
 module.exports = { signUp, signIn, getUser };
-
-  
