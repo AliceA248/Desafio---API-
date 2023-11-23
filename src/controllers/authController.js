@@ -25,7 +25,6 @@ const signUp = async (req, res) => {
   try {
     const { nome, email, senha, telefone } = req.body;
 
-    // Verificar se o e-mail já existe
     const existingUser = await new Promise((resolve, reject) => {
       db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
         if (err) {
@@ -37,11 +36,9 @@ const signUp = async (req, res) => {
     });
 
     if (existingUser) {
-      // Se o e-mail já existe, retornar um erro
-      return res.status(400).json({ mensagem: 'E-mail já existente' });
+      return res.status(400).json({ mensagem: 'E-mail já está cadastrado' });
     }
 
-    // Se o e-mail não existe, prosseguir com a inserção
     const id = uuidv4();
     const dataCriacao = new Date().toISOString();
     const hashedPassword = await bcrypt.hash(senha, 10);
@@ -145,7 +142,7 @@ const getUser = (req, res) => {
 
 const generateToken = (userId, userEmail) => {
   return jwt.sign({ userId, userEmail }, 'secretpassword', {
-    expiresIn: '1h',
+    expiresIn: '30m',
   });
 };
 
