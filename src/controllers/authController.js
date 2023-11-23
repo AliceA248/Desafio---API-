@@ -6,11 +6,13 @@ const signUp = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Verificar se o e-mail já está cadastrado
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ mensagem: 'E-mail já existente' });
     }
 
+    // Criptografar a senha antes de salvar no banco de dados
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({ email, password: hashedPassword });
@@ -48,3 +50,4 @@ const getUser = (req, res) => {
 };
 
 module.exports = { signUp, signIn, getUser };
+
