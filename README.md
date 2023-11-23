@@ -42,7 +42,7 @@ npm start
 ````
 
 
-# Happy coding!" 🚀✨
+# Happy coding! 🚀✨
 
 
 
