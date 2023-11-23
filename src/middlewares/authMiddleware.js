@@ -17,7 +17,6 @@ const authenticateToken = (req, res, next) => {
       }
     }
 
-    // Verificar se o usuário associado ao token ainda existe
     const user = await User.findById(decodedToken.userId);
     if (!user) {
       return res.status(401).json({ mensagem: 'Não autorizado' });

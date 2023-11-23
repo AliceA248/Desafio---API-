@@ -5,10 +5,43 @@ const sqlite3 = require('sqlite3').verbose();
 
 const db = new sqlite3.Database('authdb.sqlite3');
 
+const verifyToken = (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, 'secretpassword'); 
+
+    req.userData = { userId: decodedToken.userId };
+    next();
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ mensagem: 'Sessão inválida' });
+    }
+
+    return res.status(401).json({ mensagem: 'Não autorizado' });
+  }
+};
+
 const signUp = async (req, res) => {
   try {
     const { nome, email, senha, telefone } = req.body;
 
+    // Verificar se o e-mail já existe
+    const existingUser = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(user);
+        }
+      });
+    });
+
+    if (existingUser) {
+      // Se o e-mail já existe, retornar um erro
+      return res.status(400).json({ mensagem: 'E-mail já existente' });
+    }
+
+    // Se o e-mail não existe, prosseguir com a inserção
     const id = uuidv4();
     const dataCriacao = new Date().toISOString();
     const hashedPassword = await bcrypt.hash(senha, 10);
@@ -35,6 +68,8 @@ const signUp = async (req, res) => {
   }
 };
 
+
+
 const signIn = async (req, res) => {
   try {
     const { email, senha } = req.body;
@@ -56,7 +91,6 @@ const signIn = async (req, res) => {
 
       const token = generateToken(user.id, user.email);
 
-      // Atualizar último login
       const ultimoLogin = new Date().toISOString();
       db.run('UPDATE users SET ultimo_login = ? WHERE id = ?', [ultimoLogin, user.id]);
 
@@ -115,4 +149,4 @@ const generateToken = (userId, userEmail) => {
   });
 };
 
-module.exports = { signUp, signIn, getUser };
+module.exports = { signUp, signIn, getUser, verifyToken };
