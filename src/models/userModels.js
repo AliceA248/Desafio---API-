@@ -1,8 +1,14 @@
-const mongoose = require('mongoose');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('authdb.sqlite3');
 
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
-
-module.exports = mongoose.model('User', userSchema);
+db.run(`
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    nome TEXT,
+    email TEXT,
+    senha TEXT,
+    telefone TEXT,
+    data_criacao TEXT,
+    ultimo_login TEXT
+  )
+`);
